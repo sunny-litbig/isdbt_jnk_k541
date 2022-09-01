@@ -20,8 +20,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+
+
 #include "pmap.h"
 
+#if 1
+#include <limits.h>
+#include <tccmisc_drv.h>
+
+#define TCCMISC_DEV_NAME    "/dev/tccmisc"
+
+int pmap_get_info(const char *name, pmap_t *mem)
+{
+	FILE* tccmisc_fd = NULL;
+	struct tccmisc_user_t tccmisc_info;
+	
+	tccmisc_fd = open(TCCMISC_DEV_NAME, O_RDWR | O_NDELAY);
+	
+	if (tccmisc_fd < 0)
+	{
+		ALOGE("%s driver open error!! \n", TCCMISC_DEV_NAME);
+		return -1;
+	}
+	
+	memset(&tccmisc_info, 0, sizeof(struct tccmisc_user_t));
+	memcpy(&tccmisc_info.name, name, sizeof(tccmisc_info.name));
+	
+	if (ioctl(tccmisc_fd, IOCTL_TCCMISC_PMAP, &tccmisc_info) < 0) {
+		ALOGE("tccmisc ioctl error! \n");
+		close(tccmisc_fd);
+		return -1;
+	}
+
+	ALOGV("name = %s, BaseAddress = 0x%llX Size = 0x%llX\n", tccmisc_info.name, 
+	tccmisc_info.base, tccmisc_info.size);
+
+	if (tccmisc_info.base <= UINT_MAX)
+	{
+		mem->base = (unsigned int)tccmisc_info.base;
+	}
+	else
+	{
+		ALOGE("tccmisc_info.base is over unsiengd int range. \n");
+	}
+
+	if (tccmisc_info.size <= UINT_MAX)
+	{
+		mem->size = (unsigned int)tccmisc_info.size;
+	}
+	else
+	{
+		ALOGE("tccmisc_info.size is over unsiengd int range. \n");
+	}
+
+	close(tccmisc_fd);
+
+    return 0;
+}
+#else
 #define PATH_PROC_PMAP	"/proc/pmap"
 
 int pmap_get_info(const char *name, pmap_t *mem)
@@ -60,3 +116,4 @@ int pmap_get_info(const char *name, pmap_t *mem)
     //ALOGE("can't get physical memory '%s'", name);
     return 0;
 }
+#endif

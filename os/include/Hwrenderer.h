@@ -35,8 +35,9 @@ typedef unsigned int uint32_t;
 #include <tccfb_ioctrl.h>
 #include <tcc_viqe_ioctl.h>
 #include <tcc_mem_ioctl.h>
+#ifdef ENABLE_VSYNC
 #include <tcc_vsync_ioctl.h>
-
+#endif
 #include <libpmap/pmap.h>
 #include <stdlib.h>
 #include <linux/fb.h>

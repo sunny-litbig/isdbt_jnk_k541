@@ -147,11 +147,16 @@ int subtitle_memory_linux_create(int width, int height)
     }	
 #endif	
 
-    pmap_get_info("overlay1", &pmem_info);
+	pmem_info.base = 0;
+	pmem_info.size = 0;
+	
+    //pmap_get_info("overlay1", &pmem_info);
+    pmap_get_info("subtitle", &pmem_info);
     pmem_addr = pmem_info.base;
     pmem_size = pmem_info.size;
 
     page_size = getpagesize();
+
     if(pmem_size != 0 && page_size != 0){
     	n_page = (pmem_size / page_size);
     	if(pmem_size % page_size) n_page++;

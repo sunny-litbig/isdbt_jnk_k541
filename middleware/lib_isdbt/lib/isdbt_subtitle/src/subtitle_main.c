@@ -31,7 +31,9 @@ typedef unsigned int uint32_t;
 #include <linux/fb.h>
 #include <cutils/properties.h>
 #include <tccfb_ioctrl.h>
+#ifdef ENABLE_VSYNC
 #include <tcc_ccfb_ioctl.h>
+#endif
 #include <BitParser.h>
 #include <ISDBT_Caption.h>
 #include <TsParser_Subtitle.h>

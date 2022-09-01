@@ -54,6 +54,7 @@ int parsePayload(TS_PARSER *pTsParser, unsigned char *buf, unsigned int size, Mp
 	unsigned short tempShort;
 	long long temp;
 	unsigned char *p = buf;
+	unsigned char PTS_DTS_FLAG_temp = 0;
 
 	memset(pes, 0x0, sizeof(MpegPesHeader));
 
@@ -93,8 +94,13 @@ int parsePayload(TS_PARSER *pTsParser, unsigned char *buf, unsigned int size, Mp
 				pes->payload = p + pes->header_length;
 				pes->payload_size = size - (6 + 3 + pes->header_length);
 
-				switch (pes->flag.PTS_DTS_flags)
-				{
+#if 1
+				PTS_DTS_FLAG_temp = (tempShort & 0x00C0) >> 6;				
+				switch (PTS_DTS_FLAG_temp)
+#else
+ 				switch (pes->flag.PTS_DTS_flags)
+#endif
+ 				{
 					case 0:	/* No PTS and DTS */
 					case 1:
 						pes->pts = 0;
@@ -109,7 +115,7 @@ int parsePayload(TS_PARSER *pTsParser, unsigned char *buf, unsigned int size, Mp
 						temp |= *p++ << 7;
 						temp |= ((*p++ & 0xfe) >> 1);
 						pes->pts = temp;
-						break;
+ 						break;
 
 					case 3:	/* PTS and DTS */
 						temp = (long long) ((*p++ & 0x0e) >> 1) << 30;
@@ -118,6 +124,7 @@ int parsePayload(TS_PARSER *pTsParser, unsigned char *buf, unsigned int size, Mp
 						temp |= *p++ << 7;
 						temp |= ((*p++ & 0xfe) >> 1);
 						pes->pts = temp;
+						
 						temp = (long long) ((*p++ & 0x0e) >> 1) << 30;
 						temp |= *p++ << 22;
 						temp |= ((*p++ & 0xfe) >> 1) << 15;
@@ -136,7 +143,11 @@ int parsePayload(TS_PARSER *pTsParser, unsigned char *buf, unsigned int size, Mp
 				}
 
 				pTsParser->nPrevPTS = pTsParser->nPTS;
+#if 1
+				pTsParser->nPESScrambled = (tempShort & 0x0300) >> 12;
+#else
 				pTsParser->nPESScrambled = !!(pes->flag.PES_scrambling_control);
+#endif
 			}
 
 			pTsParser->nContentSize = pes->length;

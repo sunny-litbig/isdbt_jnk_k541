@@ -39,7 +39,10 @@ typedef unsigned int uint32_t;
 
 #include <linux/videodev2.h>
 #include <linux/fb.h>
+//#define ENABLE_VSYNC
+#ifdef ENABLE_VSYNC
 #include <tcc_vsync_ioctl.h>
+#endif
 #include <libpmap/pmap.h>
 
 #include <tcc_video_common.h>
@@ -299,11 +302,13 @@ OMX_ERRORTYPE dxb_omx_fbdev_sink_no_clockcomp_component_Constructor (OMX_COMPONE
 	pPrivateData->mVsyncDevice = open(tname, O_RDWR);
 	if (pPrivateData->mVsyncDevice < 0)
 	{
+#ifdef ENABLE_VSYNC
 		pPrivateData->mVsyncDevice = open(VSYNC_DEVICE, O_RDWR);
 		if (pPrivateData->mVsyncDevice < 0)
 		{
 			ALOGE("can't open vsync driver[%d]", pPrivateData->iDeviceIndex);
 		}
+#endif
 	}
 
 	return err;
@@ -743,8 +748,10 @@ void dxb_omx_fbdev_sink_component_BufferMgmtCallback (OMX_COMPONENTTYPE * openma
 			pPrivateData->prev_output_ch_index, omx_fbdev_sink_component_Private->output_ch_index, pDisplayInfo->vsync_enable, pPrivateData->mVsyncDevice, pSeamless_info->iFirstFrame_Pushed);
 		if (pSeamless_info->iFirstFrame_Pushed) {
 			if((pDisplayInfo->vsync_enable == 1) && (pPrivateData->mVsyncDevice >= 0)) {
+#ifdef ENABLE_VSYNC
 				ioctl(pPrivateData->mVsyncDevice, TCC_LCDC_VIDEO_SKIP_FRAME_START, 0);
 				ioctl(pPrivateData->mVsyncDevice, TCC_LCDC_VIDEO_SKIP_FRAME_END, 0);
+#endif 
 			}
 			pDisplayInfo->bypass_clear_vsync = 1;
 		}

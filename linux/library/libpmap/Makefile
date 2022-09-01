@@ -53,6 +53,7 @@ LOCAL_VERSION := _$(LOCAL_VERSION_MAJOR).$(LOCAL_VERSOIN_MINOR)
 LOCAL_PATH	:=./
 LOCAL_SRC_PATH := ./
 
+KERNEL_TCCMISC_PATH := $(OECORE_TARGET_SYSROOT)/usr/src/kernel/include/uapi/misc/
 #########################################################
 #	Setting Target Folder 
 #########################################################
@@ -82,6 +83,7 @@ LOCAL_INCLUDE_HEADERS :=
 
 #LOCAL_INCLUDE_HEADERS += $(LOCAL_PATH)
 LOCAL_INCLUDE_HEADERS += $(SYSTEM_INCLUDE)
+LOCAL_INCLUDE_HEADERS += $(KERNEL_TCCMISC_PATH)
 
 #########################################################
 #	Add  local cflag  

@@ -1,4 +1,5 @@
 #!/bin/sh
+ps -ef | grep Launcher | awk '{print $2}' | xargs kill
 
 ## make symblic link for device drivers 
 ln -s /dev/dvb/adapter0/demux0 /dev/dvb0.demux0

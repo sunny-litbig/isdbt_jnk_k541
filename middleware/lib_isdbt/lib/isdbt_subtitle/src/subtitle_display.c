@@ -63,7 +63,9 @@ For backtrace
 /**********************************************************************************
 CCFB DEFINITIONS
 ***********************************************************************************/
+#ifdef ENABLE_VSYNC
 #include <tcc_ccfb_ioctl.h>
+#endif
 #ifdef HAVE_LINUX_PLATFORM
 #include <tcc_wmixer_ioctrl.h>
 #endif
@@ -3337,8 +3339,10 @@ int subtitle_display_update_ccfb(unsigned int *pAddr)
 			return -1;
 		}
 		if(update_sync_drawing == 1){
+#ifdef ENABLE_VSYNC		
 			ioctl(ccfb_fd, CCFB_DISP_UPDATE, (void*)&pAddr);
 			LOGE("[%s] physical address[%p]\n", __func__, pAddr);
+#endif
 		}
 	}
 	return 0;
@@ -3354,8 +3358,9 @@ int subtitle_display_get_state_ccfb(void)
 		LOGE("ccfb_fd is not initialized yet!\n");
 		return -1;
 	}
+#ifdef ENABLE_VSYNC
 	ioctl(ccfb_fd, CCFB_GET_CONFIG, &state);
-
+#endif
 	return (int) state;
 }
 

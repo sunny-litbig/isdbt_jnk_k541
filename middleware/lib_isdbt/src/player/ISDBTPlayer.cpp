@@ -31,8 +31,9 @@
 typedef unsigned int uint32_t;
 #endif
 #include <tccfb_ioctrl.h>
+#ifdef ENABLE_VSYNC
 #include <tcc_vsync_ioctl.h>
-
+#endif
 #include "tcc_isdbt_proc.h"
 #include "tcc_isdbt_event.h"
 #include "player/ISDBTPlayer.h"

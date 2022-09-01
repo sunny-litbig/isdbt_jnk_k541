@@ -146,6 +146,7 @@ int subtitle_hw_scaler
 	ALOGE("[%s]", __func__);
 	int ret = -1;
 	int scaler_fd = -1;
+#ifdef ENABLE_VSYNC
 
 	SCALER_TYPE scaler_type;
 	struct pollfd poll_event[1];
@@ -219,6 +220,7 @@ int subtitle_hw_scaler
 
 END:
 	if(scaler_fd>=0) close(scaler_fd);
+#endif 
 
 	return ret;
 }

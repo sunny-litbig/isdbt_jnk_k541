@@ -1577,8 +1577,13 @@ OMX_ERRORTYPE dxb_omx_audiodec_component_GetParameter(
 //#define	DUMP_OUTPUT_TO_FILE
 #if defined(DUMP_INPUT_TO_FILE) || defined(DUMP_OUTPUT_TO_FILE)
 #define INTPUT_FILE_PATH "/sdcard/audioinput1.mp2"
+#if 0
 #define OUTPUT_FILE1_PATH "/run/media/mmcblk0p10/fullseg.pcm"
 #define OUTPUT_FILE2_PATH "/run/media/mmcblk0p10/1seg.pcm"
+#else
+#define OUTPUT_FILE1_PATH "/run/media/sda1/fullseg.pcm"
+#define OUTPUT_FILE2_PATH "/run/media/sda1/1seg.pcm"
+#endif
 
 int	gDumpHandle = 0;
 FILE *gFileInput;

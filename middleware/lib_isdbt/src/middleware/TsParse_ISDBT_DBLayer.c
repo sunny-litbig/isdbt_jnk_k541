@@ -1633,12 +1633,8 @@ BOOL InsertDB_VideoPIDTable
 	eDemuxState = tcc_manager_demux_get_state();
 	if ((eDemuxState != E_DEMUX_STATE_SCAN)
 		&& (eDemuxState != E_DEMUX_STATE_INFORMAL_SCAN)) {
-		sprintf(szSQL, "SELECT uiVideo_PID \
-					FROM videoPID \
-					WHERE usServiceID=%d \
-						AND uiCurrentChannelNumber=%d",
-					pServiceList->usServiceID,
-					uiCurrentChannelNumber);
+		sprintf(szSQL, "SELECT uiVideo_PID FROM videoPID WHERE usServiceID=%d AND uiCurrentChannelNumber=%d",
+                pServiceList->usServiceID, uiCurrentChannelNumber);
 
 
 		if (sqlite3_prepare_v2(g_pISDBTDB, szSQL, strlen(szSQL), &stmt, NULL) == SQLITE_OK) {
@@ -1689,28 +1685,21 @@ BOOL InsertDB_VideoPIDTable
 
 		// Insert AudioPID List into DB.
 		for (i=0; i < pServiceList->uiTotalVideo_PID && i < MAX_VIDEOPID_SUPPORT; i++) {
-			sprintf(szSQL,"INSERT \
-						INTO videoPID (usServiceID, \
-							uiCurrentChannelNumber, \
-							uiCurrentCountryCode, \
-							usNetworkID, \
-							uiVideo_PID, \
-							ucVideo_IsScrambling, \
-							ucVideo_StreamType, \
-							ucVideoType, \
-							ucComponent_Tag, \
-							acLangCode) \
-						VALUES (%d, %d, %d, %d, %d, %d, %d, %d, %d, '%s')",
-						pServiceList->usServiceID,
-						uiCurrentChannelNumber,
-						uiCurrentCountryCode,
-						pServiceList->usNetworkID,
-						pServiceList->stVideo_PIDInfo[i].uiVideo_PID,
-						pServiceList->stVideo_PIDInfo[i].ucVideo_IsScrambling,
-						pServiceList->stVideo_PIDInfo[i].ucVideo_StreamType,
-						pServiceList->stVideo_PIDInfo[i].ucVideoType,
-						pServiceList->stVideo_PIDInfo[i].ucComponent_Tag,
-						pServiceList->stVideo_PIDInfo[i].acLangCode);
+			sprintf(szSQL,"INSERT INTO videoPID \
+(usServiceID, uiCurrentChannelNumber, uiCurrentCountryCode, usNetworkID, \
+uiVideo_PID, ucVideo_IsScrambling, ucVideo_StreamType, ucVideoType, ucComponent_Tag, acLangCode) \
+VALUES (%d, %d, %d, %d, %d, %d, %d, %d, %d, '%s')",
+pServiceList->usServiceID,
+uiCurrentChannelNumber,
+uiCurrentCountryCode,
+pServiceList->usNetworkID,
+pServiceList->stVideo_PIDInfo[i].uiVideo_PID,
+pServiceList->stVideo_PIDInfo[i].ucVideo_IsScrambling,
+pServiceList->stVideo_PIDInfo[i].ucVideo_StreamType,
+pServiceList->stVideo_PIDInfo[i].ucVideoType,
+pServiceList->stVideo_PIDInfo[i].ucComponent_Tag,
+pServiceList->stVideo_PIDInfo[i].acLangCode);
+
 			err = TCC_SQLITE3_EXEC(g_pISDBTDB, szSQL, NULL, NULL, NULL);
 			if (err != SQLITE_OK) ALOGE("[%s:%d] ERROR : %d\n", __func__, __LINE__, err);
 		}
@@ -1744,12 +1733,8 @@ BOOL InsertDB_AudioPIDTable
 	if ((eDemuxState != E_DEMUX_STATE_SCAN)
 		&& (eDemuxState != E_DEMUX_STATE_INFORMAL_SCAN)
 		&& (eDemuxState != E_DEMUX_STATE_IDLE)) {
-		sprintf(szSQL, "SELECT uiAudio_PID \
-					FROM audioPID \
-					WHERE usServiceID=%d \
-						AND uiCurrentChannelNumber=%d",
-					pServiceList->usServiceID,
-					uiCurrentChannelNumber);
+		sprintf(szSQL, "SELECT uiAudio_PID FROM audioPID WHERE usServiceID=%d AND uiCurrentChannelNumber=%d",
+                pServiceList->usServiceID, uiCurrentChannelNumber);
 
 
 		if (sqlite3_prepare_v2(g_pISDBTDB, szSQL, strlen(szSQL), &stmt, NULL) == SQLITE_OK) {
@@ -1800,28 +1785,21 @@ BOOL InsertDB_AudioPIDTable
 
 		// Insert AudioPID List into DB.
 		for (i=0; i < pServiceList->uiTotalAudio_PID && i < MAX_AUDIOPID_SUPPORT; i++) {
-			sprintf(szSQL,"INSERT \
-						INTO audioPID (usServiceID, \
-							uiCurrentChannelNumber, \
-							uiCurrentCountryCode, \
-							usNetworkID, \
-							uiAudio_PID, \
-							ucAudio_IsScrambling, \
-							ucAudio_StreamType, \
-							ucAudioType, \
-							ucComponent_Tag, \
-							acLangCode) \
-						VALUES (%d, %d, %d, %d, %d, %d, %d, %d, %d, '%s')",
-						pServiceList->usServiceID,
-						uiCurrentChannelNumber,
-						uiCurrentCountryCode,
-						pServiceList->usNetworkID,
-						pServiceList->stAudio_PIDInfo[i].uiAudio_PID,
-						pServiceList->stAudio_PIDInfo[i].ucAudio_IsScrambling,
-						pServiceList->stAudio_PIDInfo[i].ucAudio_StreamType,
-						pServiceList->stAudio_PIDInfo[i].ucAudioType,
-						pServiceList->stAudio_PIDInfo[i].ucComponent_Tag,
-						pServiceList->stAudio_PIDInfo[i].acLangCode);
+			sprintf(szSQL,"INSERT INTO audioPID \
+(usServiceID, uiCurrentChannelNumber, uiCurrentCountryCode, usNetworkID, uiAudio_PID, \
+ucAudio_IsScrambling, ucAudio_StreamType, ucAudioType, ucComponent_Tag, acLangCode) \
+VALUES (%d, %d, %d, %d, %d, %d, %d, %d, %d, '%s')",
+pServiceList->usServiceID,
+uiCurrentChannelNumber,
+uiCurrentCountryCode,
+pServiceList->usNetworkID,
+pServiceList->stAudio_PIDInfo[i].uiAudio_PID,
+pServiceList->stAudio_PIDInfo[i].ucAudio_IsScrambling,
+pServiceList->stAudio_PIDInfo[i].ucAudio_StreamType,
+pServiceList->stAudio_PIDInfo[i].ucAudioType,
+pServiceList->stAudio_PIDInfo[i].ucComponent_Tag,
+pServiceList->stAudio_PIDInfo[i].acLangCode);
+
 			err = TCC_SQLITE3_EXEC(g_pISDBTDB, szSQL, NULL, NULL, NULL);
 			if (err != SQLITE_OK) ALOGE("[%s:%d] ERROR : %d\n", __func__, __LINE__, err);
 		}
@@ -1855,12 +1833,8 @@ BOOL InsertDB_SubTitlePIDTable
 	if ((eDemuxState != E_DEMUX_STATE_SCAN)
 		&& (eDemuxState != E_DEMUX_STATE_INFORMAL_SCAN)
 		&& (eDemuxState != E_DEMUX_STATE_IDLE)) {
-		sprintf(szSQL, "SELECT uiSt_PID \
-					FROM subtitlePID \
-					WHERE usServiceID=%d \
-						AND uiCurrentChannelNumber=%d",
-					pServiceList->usServiceID,
-					uiCurrentChannelNumber);
+		sprintf(szSQL, "SELECT uiSt_PID FROM subtitlePID WHERE usServiceID=%d AND uiCurrentChannelNumber=%d",
+                pServiceList->usServiceID, uiCurrentChannelNumber);
 
 
 		if (sqlite3_prepare_v2(g_pISDBTDB, szSQL, strlen(szSQL), &stmt, NULL) == SQLITE_OK) {
@@ -1892,20 +1866,14 @@ BOOL InsertDB_SubTitlePIDTable
 		if (err != SQLITE_OK) ALOGE("[%s:%d] err:%d\n", __func__, __LINE__, err);
 
 		// Insert SubTitlePID List into DB.
-		sprintf(szSQL,"INSERT \
-					INTO subtitlePID (usServiceID, \
-						uiCurrentChannelNumber, \
-						uiCurrentCountryCode, \
-						usNetworkID, \
-						uiSt_PID, \
-						ucComponent_Tag) \
-					VALUES (%d, %d, %d, %d, %d, %d)",
-					pServiceList->usServiceID,
-					uiCurrentChannelNumber,
-					uiCurrentCountryCode,
-					pServiceList->usNetworkID,
-					pServiceList->stSubtitleInfo[0].ucSubtitle_PID,
-					pServiceList->stSubtitleInfo[0].ucComponent_Tag);
+		sprintf(szSQL,"INSERT INTO subtitlePID (usServiceID, uiCurrentChannelNumber, uiCurrentCountryCode, usNetworkID, uiSt_PID, ucComponent_Tag) VALUES (%d, %d, %d, %d, %d, %d)",
+                pServiceList->usServiceID,
+                uiCurrentChannelNumber,
+                uiCurrentCountryCode,
+                pServiceList->usNetworkID,
+                pServiceList->stSubtitleInfo[0].ucSubtitle_PID,
+                pServiceList->stSubtitleInfo[0].ucComponent_Tag);
+
 		err = TCC_SQLITE3_EXEC(g_pISDBTDB, szSQL, NULL, NULL, NULL);
 		if (err != SQLITE_OK) ALOGE("[%s:%d] ERROR : %d\n", __func__, __LINE__, err);
 	}
@@ -2002,14 +1970,14 @@ BOOL UpdateDB_Logo_Info (T_ISDBT_LOGO_INFO *pstLogoInfo)
 			}
 		} else if (rc == SQLITE_DONE) {
 			/* there is no logo */
-			sprintf(szSQL, "INSERT INTO logo (NetID, DWNL_ID, LOGO_ID, LOGO_Type, Ver, Size, Image) \
-							VALUES(%d, %d, %d, %d, %d, %d, ?)",
-							pstLogoInfo->original_network_id,
-							pstLogoInfo->download_data_id,
-							pstLogoInfo->logo_id,
-							pstLogoInfo->logo_type,
-							pstLogoInfo->logo_version,
-							pstLogoInfo->data_size_length);
+			sprintf(szSQL, "INSERT INTO logo (NetID, DWNL_ID, LOGO_ID, LOGO_Type, Ver, Size, Image) VALUES(%d, %d, %d, %d, %d, %d, ?)",
+                    pstLogoInfo->original_network_id,
+                    pstLogoInfo->download_data_id,
+                    pstLogoInfo->logo_id,
+                    pstLogoInfo->logo_type,
+                    pstLogoInfo->logo_version,
+                    pstLogoInfo->data_size_length);
+
 			if (sqlite3_prepare_v2(g_pISDBTLogoDB, szSQL, strlen(szSQL), &stmt, NULL) == SQLITE_OK) {
 				sqlite3_reset (stmt);
 				err = sqlite3_bind_blob (stmt, 1, pstLogoInfo->data_byte, pstLogoInfo->data_size_length, SQLITE_TRANSIENT);
@@ -2340,46 +2308,15 @@ int CreateDB_EPG_Table(int iTableType, int iChannelNumber, int iNetworkID, int i
 
 	if (g_pISDBTEPGDB != NULL) {
 		sprintf(szTableName, "%s_%d_0x%x", szTableType[iTableType], iChannelNumber, iServiceID);
-		sprintf(szSQL,
-				"create table if not exists %s (_id integer primary key, \
-					uiUpdatedFlag integer, \
-					uiTableId integer, \
-					uiCurrentChannelNumber integer, \
-					uiCurrentCountryCode integer, \
-					ucVersionNumber integer, \
-					ucSection integer, \
-					ucLastSection integer, \
-					ucSegmentLastSection integer, \
-					OrgNetworkID integer, \
-					TStreamID integer, \
-					usServiceID integer, \
-					EventID integer, \
-					Start_MJD integer, \
-					Start_HH integer, \
-					Start_MM integer, \
-					Start_SS integer, \
-					Duration_HH integer, \
-					Duration_MM integer, \
-					Duration_SS integer, \
-					iLen_EvtName integer, \
-					EvtName text, \
-					iLen_EvtText integer, \
-					EvtText text, \
-					iLen_ExtEvtItem integer, \
-					ExtEvtItem text, \
-					iLen_ExtEvtText integer, \
-					ExtEvtText text, \
-					Genre integer, \
-					AudioMode integer, \
-					AudioSr integer, \
-					AudioLang1 integer, \
-					AudioLang2 integer, \
-					VideoMode integer, \
-					iRating integer, \
-					RefServiceID integer, \
-					RefEventID integer, \
-					MultiOrCommonEvent integer)", 
-					szTableName);
+		sprintf(szSQL, "create table if not exists %s (_id integer primary key, \
+uiUpdatedFlag integer, uiTableId integer, uiCurrentChannelNumber integer, uiCurrentCountryCode integer, \
+ucVersionNumber integer, ucSection integer, ucLastSection integer, ucSegmentLastSection integer, OrgNetworkID integer, \
+TStreamID integer, usServiceID integer, EventID integer, Start_MJD integer, Start_HH integer, Start_MM integer, \
+Start_SS integer, Duration_HH integer, Duration_MM integer, Duration_SS integer, iLen_EvtName integer, \
+EvtName text, iLen_EvtText integer, EvtText text, iLen_ExtEvtItem integer, ExtEvtItem text, iLen_ExtEvtText integer, \
+ExtEvtText text, Genre integer, AudioMode integer, AudioSr integer, AudioLang1 integer, AudioLang2 integer, \
+VideoMode integer, iRating integer, RefServiceID integer, RefEventID integer, MultiOrCommonEvent integer)", 
+szTableName);
 
 		err = TCC_SQLITE3_EXEC(g_pISDBTEPGDB, szSQL, NULL, NULL, NULL);
 		if (err != SQLITE_OK) {
@@ -2605,8 +2542,9 @@ int DeleteDB_EPG_Schedule_Table(int iChannelNumber, int iServiceID, int iTableID
 		}
 
 		sprintf(szSQL, "DELETE FROM EPG_Sche_%d_0x%x \
-						WHERE uiTableId=%d AND ucSection=%d AND ucVersionNumber!=%d",
-			   			iChannelNumber, iServiceID, iTableID, iSectionNumber, iVersionNumber);
+WHERE uiTableId=%d AND ucSection=%d AND ucVersionNumber!=%d",
+iChannelNumber, iServiceID, iTableID, iSectionNumber, iVersionNumber);
+
 		err = TCC_SQLITE3_EXEC(g_pISDBTEPGDB, szSQL, NULL, NULL, NULL);
 		if (err != SQLITE_OK) ALOGE("[%s:%d] err:%d\n", __func__, __LINE__, err);
 	}
@@ -3709,11 +3647,11 @@ int tcc_db_get_representative_channel(int iChannelNumber, int iServiceType, \
 
 		if(iServiceType == SERVICE_TYPE_FSEG) {
 			sprintf(szSQL, "SELECT _id, audioPID, videoPID, stPID, siPID, serviceType, serviceID, PMT_PID, CA_ECM_PID, AC_ECM_PID, networkID, uiTotalAudio_PID, uiTotalVideo_PID, uiPCR_PID, ucAudio_StreamType, ucVideo_StreamType, threedigitNumber \
-							FROM channels WHERE channelNumber=%d AND (serviceType=1 OR serviceType=161) AND (audioPID!=65535 OR videoPID!=65535) ORDER BY threedigitNumber", iChannelNumber);
+FROM channels WHERE channelNumber=%d AND (serviceType=1 OR serviceType=161) AND (audioPID!=65535 OR videoPID!=65535) ORDER BY threedigitNumber", iChannelNumber);
 		}
 		else {
 			sprintf(szSQL, "SELECT _id, audioPID, videoPID, stPID, siPID, serviceType, serviceID, PMT_PID, CA_ECM_PID, AC_ECM_PID, networkID, uiTotalAudio_PID, uiTotalVideo_PID, uiPCR_PID, ucAudio_StreamType, ucVideo_StreamType, threedigitNumber \
-							FROM channels WHERE channelNumber=%d AND serviceType=192 AND (audioPID!=65535 OR videoPID!=65535) AND (PMT_PID>8135 AND PMT_PID<8145) ORDER BY threedigitNumber", iChannelNumber);
+FROM channels WHERE channelNumber=%d AND serviceType=192 AND (audioPID!=65535 OR videoPID!=65535) AND (PMT_PID>8135 AND PMT_PID<8145) ORDER BY threedigitNumber", iChannelNumber);
 		}
 
 		tcc_dxb_channel_db_lock_on();
@@ -3817,12 +3755,12 @@ int tcc_db_get_primaryService(int iChannelNumber, int iServiceType, \
 		if(iServiceType == SERVICE_TYPE_FSEG)
 		{
 			sprintf(szSQL, "SELECT _id, audioPID, videoPID, stPID, siPID, serviceType, serviceID, PMT_PID, CA_ECM_PID, AC_ECM_PID, networkID, uiTotalAudio_PID, uiTotalVideo_PID, uiPCR_PID, ucAudio_StreamType, ucVideo_StreamType, threedigitNumber, primaryServiceFlag \
-							FROM channels WHERE channelNumber=%d AND (serviceType=1 OR serviceType=161) AND (audioPID!=65535 OR videoPID!=65535) AND primaryServiceFlag=1", iChannelNumber);
+FROM channels WHERE channelNumber=%d AND (serviceType=1 OR serviceType=161) AND (audioPID!=65535 OR videoPID!=65535) AND primaryServiceFlag=1", iChannelNumber);
 		}
 		else
 		{
 			sprintf(szSQL, "SELECT _id, audioPID, videoPID, stPID, siPID, serviceType, serviceID, PMT_PID, CA_ECM_PID, AC_ECM_PID, networkID, uiTotalAudio_PID, uiTotalVideo_PID, uiPCR_PID, ucAudio_StreamType, ucVideo_StreamType, threedigitNumber, primaryServiceFlag \
-							FROM channels WHERE channelNumber=%d AND serviceType=192 AND (audioPID!=65535 OR videoPID!=65535) AND (PMT_PID>8135 AND PMT_PID<8145) AND primaryServiceFlag=2", iChannelNumber);
+FROM channels WHERE channelNumber=%d AND serviceType=192 AND (audioPID!=65535 OR videoPID!=65535) AND (PMT_PID>8135 AND PMT_PID<8145) AND primaryServiceFlag=2", iChannelNumber);
 		}
 
 		tcc_dxb_channel_db_lock_on();
@@ -3925,10 +3863,10 @@ int tcc_db_get_channel_data_ForChannel(ST_CHANNEL_DATA *p, unsigned int uiChanne
 	if (g_pISDBTDB != NULL)
 	{
 		sprintf(szSQL, "SELECT	\
-						channelNumber, countryCode, audioPID, videoPID, stPID, siPID, PMT_PID, remoconID,	\
-						serviceType, serviceID, regionID, threedigitNumber, TStreamID, berAVG, networkID, channelName	\
-						FROM channels WHERE serviceID=%d AND channelNumber=%d AND (serviceType=1 OR serviceType=192)",
-						uiChannelServiceID, uiChannelNo);
+channelNumber, countryCode, audioPID, videoPID, stPID, siPID, PMT_PID, remoconID,	\
+serviceType, serviceID, regionID, threedigitNumber, TStreamID, berAVG, networkID, channelName	\
+FROM channels WHERE serviceID=%d AND channelNumber=%d AND (serviceType=1 OR serviceType=192)",
+uiChannelServiceID, uiChannelNo);
 
 		tcc_dxb_channel_db_lock_on();
 

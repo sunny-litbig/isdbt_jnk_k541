@@ -419,10 +419,12 @@ HwRenderer::HwRenderer(
 	mBox =  atoi(value);
 
 	pMParm->bSupport_lastframe = true;
+#ifdef ENABLE_VSYNC
 	if( mBox && ioctl( pMParm->mFb_fd, TCC_LCDC_VIDEO_GET_LASTFRAME_STATUS, NULL) < 0 ) {
 		LOGI("will not use last-frame feature.");
 		pMParm->bSupport_lastframe = false;
 	}
+#endif
 
 	mOutputWidth	= outWidth;
 	mOutputHeight	= outHeight;
@@ -654,7 +656,7 @@ void HwRenderer::closeDevice()
 		}
 #endif
 	}
-
+#ifdef ENABLE_VSYNC
 #ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 	if(pMParm->mVsyncMode)
 	{
@@ -663,6 +665,7 @@ void HwRenderer::closeDevice()
 			LOGE("### error fb ioctl : TCC_LCDC_VIDEO_SKIP_FRAME_START") ;
 		pMParm->mVsyncMode = 0;
 	}
+#endif
 #endif
 
 	if(pMParm->mFb_fd != -1)
@@ -3303,9 +3306,10 @@ int HwRenderer::overlayProcess(SCALER_TYPE *scaler_arg, G2D_COMMON_TYPE *grp_arg
 		scaler_arg->src_Vaddr		= srcV;
 
 		scaler_arg->dest_Yaddr	= dest;
+#ifdef ENABLE_VSYNC		
 		scaler_arg->dest_Uaddr  	= GET_ADDR_YUV42X_spU(scaler_arg->dest_Yaddr, scaler_arg->dest_ImgWidth, scaler_arg->dest_ImgHeight);//scaler_arg->dest_Yaddr + (scaler_arg->dest_ImgWidth * scaler_arg->dest_ImgHeight);
 		scaler_arg->dest_Vaddr 	= GET_ADDR_YUV420_spV(scaler_arg->dest_Uaddr, scaler_arg->dest_ImgWidth, scaler_arg->dest_ImgHeight);
-
+#endif
 		scaler_arg->interlaced = pMParm->mVideoDeinterlaceScaleUpOneFieldFlag ? 1 : 0;
 
 		if(pMParm->mM2m_fd < 0){
@@ -3377,9 +3381,10 @@ int HwRenderer::overlayProcess(SCALER_TYPE *scaler_arg, G2D_COMMON_TYPE *grp_arg
 		grp_arg->src2		= (unsigned int)src_addrV;
 
 		grp_arg->tgt0		= (unsigned int)dest;
+#ifdef ENABLE_VSYNC		
 		grp_arg->tgt1		= GET_ADDR_YUV42X_spU(grp_arg->tgt0, grp_arg->dst_imgx, grp_arg->dst_imgy);
 		grp_arg->tgt2		= GET_ADDR_YUV420_spV(grp_arg->tgt1, grp_arg->dst_imgx, grp_arg->dst_imgy);
-
+#endif
 		if( pMParm->mRt_fd < 0 ) {
 			pMParm->mRt_fd = open(GRAPHIC_DEVICE, O_RDWR);
 			if (pMParm->mRt_fd < 0){
@@ -3451,10 +3456,10 @@ int HwRenderer::overlayProcess_Parallel(SCALER_TYPE *scaler_arg, G2D_COMMON_TYPE
 			scaler_arg->dest_Yaddr = pMParm->mOverlayRotation_1st.base;
 		else
 			scaler_arg->dest_Yaddr = pMParm->mOverlayRotation_2nd.base;
-
+#ifdef ENABLE_VSYNC
 		scaler_arg->dest_Uaddr = GET_ADDR_YUV42X_spU(scaler_arg->dest_Yaddr, scaler_arg->dest_ImgWidth, scaler_arg->dest_ImgHeight);
 		scaler_arg->dest_Vaddr = GET_ADDR_YUV420_spV(scaler_arg->dest_Uaddr, scaler_arg->dest_ImgWidth, scaler_arg->dest_ImgHeight);
-
+#endif
 		scaler_arg->interlaced = pMParm->mVideoDeinterlaceScaleUpOneFieldFlag ? 1 : 0;
 
 		if(pMParm->mM2m_fd < 0){
@@ -3500,6 +3505,7 @@ int HwRenderer::overlayProcess_Parallel(SCALER_TYPE *scaler_arg, G2D_COMMON_TYPE
 		}
 
 		//G2D Rotate!!
+#ifdef ENABLE_VSYNC
 		grp_arg->src0		= (unsigned int)scaler_arg->dest_Yaddr;
 		grp_arg->src1		= GET_ADDR_YUV42X_spU(grp_arg->src0, grp_arg->src_imgx, grp_arg->src_imgy);
 		grp_arg->src2		= GET_ADDR_YUV420_spV(grp_arg->src1, grp_arg->src_imgx, grp_arg->src_imgy);
@@ -3507,7 +3513,7 @@ int HwRenderer::overlayProcess_Parallel(SCALER_TYPE *scaler_arg, G2D_COMMON_TYPE
 		grp_arg->tgt0		= (unsigned int)dest;
 		grp_arg->tgt1		= GET_ADDR_YUV42X_spU(grp_arg->tgt0, grp_arg->dst_imgx, grp_arg->dst_imgy);
 		grp_arg->tgt2		= GET_ADDR_YUV420_spV(grp_arg->tgt1, grp_arg->dst_imgx, grp_arg->dst_imgy);
-
+#endif
 		if( pMParm->mRt_fd < 0 ) {
 			pMParm->mRt_fd = open(GRAPHIC_DEVICE, O_RDWR);
 			if (pMParm->mRt_fd < 0){
@@ -3553,14 +3559,14 @@ int HwRenderer::overlayProcess_Parallel(SCALER_TYPE *scaler_arg, G2D_COMMON_TYPE
 			grp_arg->src0		= (unsigned int)pMParm->mOverlayRotation_2nd.base;
 		else
 			grp_arg->src0		= (unsigned int)pMParm->mOverlayRotation_1st.base;
-
+#ifdef ENABLE_VSYNC
 		grp_arg->src1		= GET_ADDR_YUV42X_spU(grp_arg->src0, grp_arg->src_imgx, grp_arg->src_imgy);
-		grp_arg->src2		= GET_ADDR_YUV420_spV(grp_arg->src1, grp_arg->src_imgx, grp_arg->src_imgy);
+     	grp_arg->src2		= GET_ADDR_YUV420_spV(grp_arg->src1, grp_arg->src_imgx, grp_arg->src_imgy);
 
 		grp_arg->tgt0		= (unsigned int)dest;
 		grp_arg->tgt1		= GET_ADDR_YUV42X_spU(grp_arg->tgt0, grp_arg->dst_imgx, grp_arg->dst_imgy);
 		grp_arg->tgt2		= GET_ADDR_YUV420_spV(grp_arg->tgt1, grp_arg->dst_imgx, grp_arg->dst_imgy);
-
+#endif
 		if( pMParm->mRt_fd < 0 ) {
 			pMParm->mRt_fd = open(GRAPHIC_DEVICE, O_RDWR);
 			if (pMParm->mRt_fd < 0){
@@ -3586,10 +3592,10 @@ int HwRenderer::overlayProcess_Parallel(SCALER_TYPE *scaler_arg, G2D_COMMON_TYPE
 			scaler_arg->dest_Yaddr = pMParm->mOverlayRotation_1st.base;
 		else
 			scaler_arg->dest_Yaddr = pMParm->mOverlayRotation_2nd.base;
-
+#ifdef ENABLE_VSYNC
 		scaler_arg->dest_Uaddr = GET_ADDR_YUV42X_spU(scaler_arg->dest_Yaddr, scaler_arg->dest_ImgWidth, scaler_arg->dest_ImgHeight);
 		scaler_arg->dest_Vaddr = GET_ADDR_YUV420_spV(scaler_arg->dest_Uaddr, scaler_arg->dest_ImgWidth, scaler_arg->dest_ImgHeight);
-
+#endif
 		scaler_arg->interlaced = pMParm->mVideoDeinterlaceScaleUpOneFieldFlag ? 1 : 0;
 
 		if(pMParm->mM2m_fd < 0){
@@ -3890,6 +3896,7 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 				pMParm->mVideoDeinterlaceToMemory = 0;		// VIQE-Scaler-LCD on-the-fly (60Hz mode) and video image write to LCDC directly.
 			#endif
 
+#ifdef ENABLE_VSYNC
 			if(*overlayCheckRet)	// overlay check result is changed, so viqe/scaler driver must be closed.
 			{
 				int result;
@@ -3897,6 +3904,7 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 				LOGI("Inform that display size is changed, %d", result);
 
 			}
+#endif
 		}
 		#if defined(_TCC8800_)
 		if(pMParm->mVsyncMode && pMParm->mVideoDeinterlaceFlag && pMParm->mVideoDeinterlaceToMemory == 0)		// VIQE-Scaler-LCD will be use for de-interlace.
@@ -4117,6 +4125,7 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 				else
 					pMParm->extend_display.on_the_fly = 1;
 
+#ifdef ENABLE_VSYNC
 				if(mColorFormat == OMX_COLOR_FormatYUV420SemiPlanar)
 					pMParm->extend_display.fmt = TCC_LCDC_IMG_FMT_YUV420ITL0;
 				else if(mColorFormat == OMX_COLOR_FormatYUV422Planar)
@@ -4136,6 +4145,7 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 					}
 #endif
 				}
+#endif
 
 				//LOGV("hdmi setting buffer:0x%x Y:0x%x U:0x%x V:0x%x W:%d H:%d",
 				//	pMParm->mOverlayBuffer_PhyAddr[pMParm->mOverlayBuffer_Current], hdmi_display.addr0, hdmi_display.addr1, hdmi_display.addr2, hdmi_display.Image_width, hdmi_display.Image_height);
@@ -4201,7 +4211,9 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 					}
 #endif
 					DBUG("### mio PUSH Start1");
+					#ifdef ENABLE_VSYNC
 					pMParm->mOverlayBuffer_Current = ioctl(pMParm->mFb_fd, TCC_LCDC_VIDEO_PUSH_VSYNC, &pMParm->extend_display);
+					#endif
 					//LOGE("### mio PUSH vtime(%d), ctime(%d), b_indx(%d)", pOverlayInfo->timeStamp, pOverlayInfo->curTime,  pOverlayInfo->buffer_id) ;
 				}
 				else
@@ -4328,7 +4340,9 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 					pMParm->extend_display.output_path = (pOverlayInfo->flags & 0x00000002) ?1:0;
 
 					DBUG("$$$ mio PUSH Start2") ;
+					#ifdef ENABLE_VSYNC
 						pMParm->mOverlayBuffer_Current = ioctl(pMParm->mFb_fd, TCC_LCDC_VIDEO_PUSH_VSYNC, &pMParm->extend_display);
+					#endif
 					//LOGE("### pMParm->mOverlayBuffer_Current %d", pMParm->mOverlayBuffer_Current) ;
 					//LOGE("$$$ mio PUSH vtime(%d), ctime(%d), b_indx(%d)", pOverlayInfo->timeStamp, pOverlayInfo->curTime,  pOverlayInfo->buffer_id) ;
 				}
@@ -4394,6 +4408,7 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 		{
 			if(overlayProcess_Parallel(&pMParm->mScaler_arg, &pMParm->mGrp_arg, pOverlayInfo->YaddrPhy, pOverlayInfo->UaddrPhy, pOverlayInfo->VaddrPhy, (uint8_t *)pMParm->mOverlayBuffer_PhyAddr[pMParm->mOverlayBuffer_Current]) >= 0)
 			{
+		    #ifdef ENABLE_VSYNC
 				#ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 				if(pMParm->mVsyncMode)
 				{
@@ -4452,6 +4467,7 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 				}
 				else
 				#endif
+			#endif	
 				{
 					DBUG_FRM("LCD :: Paralel - OVERLAY_QUEUE_BUFFER :: goto end Video-%d %lld ms", pMParm->mFrame_cnt, systemTime()/1000000);
 
@@ -4472,6 +4488,7 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 		else
 		if(overlayProcess(&pMParm->mScaler_arg, &pMParm->mGrp_arg, pOverlayInfo->YaddrPhy, pOverlayInfo->UaddrPhy, pOverlayInfo->VaddrPhy, pMParm->mOverlayBuffer_PhyAddr[pMParm->mOverlayBuffer_Current]) >= 0)
 		{
+		#ifdef ENABLE_VSYN
 			#ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 			if(pMParm->mVsyncMode)
 			{
@@ -4539,6 +4556,7 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 			}
 			else
 			#endif
+        #endif
 			{
 				DBUG_FRM("LCD :: Single - OVERLAY_QUEUE_BUFFER :: goto end Video-%d %lld ms", pMParm->mFrame_cnt, systemTime()/1000000);
 
@@ -4557,6 +4575,7 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 			}
 		}
 
+#ifdef ENABLE_VSYN
 #ifdef USE_OUTPUT_COMPONENT_COMPOSITE
 		if((pMParm->mOutputMode == 2) && (pMParm->mHDMIOutput)) //dual display
 #else
@@ -4749,6 +4768,7 @@ bool HwRenderer::output_Overlay(output_overlay_param_t * pOverlayInfo, bool *ove
 			}
 #endif
 		}
+#endif
 	}
 
 	if(pMParm->mOntheflymode == 0 || bBufferchange)
@@ -4954,6 +4974,7 @@ void HwRenderer::setVsync()
 
 		_closeOverlay(lastframe_onoff);
 
+#ifdef ENABLE_VSYN
 		do {
 			result = ioctl(pMParm->mFb_fd, TCC_LCDC_VIDEO_START_VSYNC, &init_display);
 			if (result < 0) {
@@ -4961,6 +4982,7 @@ void HwRenderer::setVsync()
 				usleep(5000);
 			}
 		} while (result < 0);
+#endif 
 		LOGI("### start vsync with output : %d ",init_display.ex_output);
 	}
 	else {
@@ -4990,7 +5012,7 @@ void HwRenderer::clearVsync(bool able_use_vsync, bool prev_onthefly_mode, bool u
 			LOGE("TCC_LCDC_DISPLAY_END fail");
 	}
 #endif
-
+#ifdef ENABLE_VSYN
 #ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 
     if( pMParm->mFb_fd != -1) {
@@ -5116,7 +5138,7 @@ void HwRenderer::clearVsync(bool able_use_vsync, bool prev_onthefly_mode, bool u
 
 	property_set("tcc.sys.output_mode_plugout", "0");
 #endif
-
+#endif
 	property_set("tcc.video.surface.enable", "0");
 }
 
@@ -5133,7 +5155,7 @@ void HwRenderer::setting_mode()
 //	getfromsysfs("/sys/class/tcc_dispman/tcc_dispman/persist_output_mode", value);
 //	uiOutputMode = atoi(value);
 	uiOutputMode = OUTPUT_NONE;	// LCD only
-
+#ifdef ENABLE_VSYNC
 #ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 	// check vsync mode by system property.
 	property_get("tcc.video.vsync.enable", value, "0");
@@ -5147,6 +5169,9 @@ void HwRenderer::setting_mode()
 		if(result < 0)
 			LOGE("### error fb ioctl : TCC_LCDC_VIDEO_SKIP_FRAME_END") ;
 	}
+#endif
+#else
+	pMParm->mVsyncMode = 1;
 #endif
 
 #ifdef TCC_VIDEO_DEINTERLACE_SUPPORT
