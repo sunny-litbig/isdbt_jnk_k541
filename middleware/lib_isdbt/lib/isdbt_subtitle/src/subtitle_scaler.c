@@ -146,9 +146,7 @@ int subtitle_hw_scaler
 	ALOGE("[%s]", __func__);
 	int ret = -1;
 	int scaler_fd = -1;
-#ifdef ENABLE_VSYNC
-
-	SCALER_TYPE scaler_type;
+	struct SCALER_TYPE scaler_type;
 	struct pollfd poll_event[1];
 
 	if ((scaler_fd = subtitle_display_get_scaler_fd()) < 0){
@@ -156,7 +154,7 @@ int subtitle_hw_scaler
 		goto END;
 	}
 
-	memset(&scaler_type, 0x0, sizeof(SCALER_TYPE));
+	memset(&scaler_type, 0x0, sizeof(struct SCALER_TYPE));
 
 	scaler_type.responsetype = SCALER_INTERRUPT;
 
@@ -220,7 +218,6 @@ int subtitle_hw_scaler
 
 END:
 	if(scaler_fd>=0) close(scaler_fd);
-#endif 
 
 	return ret;
 }

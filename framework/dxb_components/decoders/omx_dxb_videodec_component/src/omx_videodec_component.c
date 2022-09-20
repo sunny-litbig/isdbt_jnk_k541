@@ -45,8 +45,8 @@ typedef unsigned int uint32_t;
 #endif
 
 #include <tccfb_ioctrl.h>
-//#define ENABLE_VSYNC
-#ifdef ENABLE_VSYNC
+
+#ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 #include <tcc_vsync_ioctl.h>
 #endif 
 
@@ -270,8 +270,8 @@ static int isVsyncEnabled(omx_videodec_component_PrivateType *omx_private, unsig
 #endif
 	return 0;
 }
-#ifdef ENABLE_VSYNC
 
+#ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 static int tcc_vsync_command(omx_videodec_component_PrivateType *omx_private, int arg1, int arg2)
 {
 	TCC_VDEC_PRIVATE *pPrivateData = (TCC_VDEC_PRIVATE*) omx_private->pPrivateData;
@@ -320,7 +320,6 @@ static int clear_front_vpu_buffer(OMX_COMPONENTTYPE *openmaxStandComp, _VIDEO_DE
 		ret = pVDecInst->gspfVDec (VDEC_BUF_FLAG_CLEAR, NULL, &nClearDispIndex, NULL, pVDecInst->pVdec_Instance);
 		ALOGE ("%s VDEC_BUF_FLAG_CLEAR Err : [%d] index : %lu",__func__, ret, pVDecInst->Display_index[pVDecInst->out_index]);
 	}
-
 	pVDecInst->out_index = (pVDecInst->out_index + 1) % pVDecInst->max_fifo_cnt;
 	if (pVDecInst->used_fifo_count > 0)
 	pVDecInst->used_fifo_count--;
@@ -338,9 +337,7 @@ static int clear_vpu_buffer(OMX_COMPONENTTYPE * openmaxStandComp, _VIDEO_DECOD_I
 
 	while (1)
 	{
-#ifdef ENABLE_VSYNC
 		tcc_vsync_command(omx_private,TCC_LCDC_VIDEO_GET_DISPLAYED, &buffer_id);
-#endif
 		if (pVDecInst->isVPUClosed == OMX_TRUE)
 		{
 			// Do not need to clear buffers.
@@ -384,9 +381,7 @@ static int clear_vpu_buffer(OMX_COMPONENTTYPE * openmaxStandComp, _VIDEO_DECOD_I
 	if (cleared_buff_count == 0)
 	{
 		ALOGE("Video Buffer Clear Sync Fail : %d %lu , loopcount(%d)\n", buffer_id, pVDecInst->Display_Buff_ID[pVDecInst->out_index], loopCount);
-#ifdef ENABLE_VSYNC
 		tcc_vsync_command(omx_private,TCC_LCDC_VIDEO_CLEAR_FRAME, UNIQUE_ID_OF_FIRST_FRAME);//pVDecInst->Display_Buff_ID[pVDecInst->out_index]);
-#endif
 
 		if (loopCount >= MAX_CHECK_COUNT_FOR_CLEAR)
 		{
@@ -401,18 +396,16 @@ static int clear_vpu_buffer(OMX_COMPONENTTYPE * openmaxStandComp, _VIDEO_DECOD_I
  		}
 		if (pVDecInst->used_fifo_count > 0)
 		pVDecInst->used_fifo_count --;
-#ifdef ENABLE_VSYNC
+
 		tcc_vsync_command(omx_private,TCC_LCDC_VIDEO_GET_DISPLAYED, &buffer_id);
-#endif
 		while (buffer_id >= pVDecInst->Display_Buff_ID[pVDecInst->out_index] && pVDecInst->used_fifo_count > 0)
 		{
 			clear_front_vpu_buffer(openmaxStandComp, pVDecInst);
 			cleared_buff_count++;
 		}
-#ifdef ENABLE_VSYNC
+
 		tcc_vsync_command(omx_private, TCC_LCDC_VIDEO_SKIP_FRAME_START, 0);
 		tcc_vsync_command(omx_private, TCC_LCDC_VIDEO_SKIP_FRAME_END, 0);
-#endif
 	}
 
 	return cleared_buff_count;
@@ -2783,7 +2776,6 @@ static void *dxb_omx_video_dec_component_vpu_deleteindex(void* param)
 						TCC_fo_free (__func__, __LINE__,ClearFrameInfo);
 						continue;
 					}
-#ifdef ENABLE_VSYNC
 #ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 					if (nVsyncEnable)
 					{
@@ -2833,7 +2825,6 @@ static void *dxb_omx_video_dec_component_vpu_deleteindex(void* param)
 							clear_front_vpu_buffer(openmaxStandComp, pVDecInst);
 						}
 					}
-#endif
 #endif
 					//nClearDispIndex++; //CAUTION !!! to avoid NULL(0) data insertion.
 					if (dxb_queue_ex(pVDecInst->pVPUDisplayedIndexQueue, (void*)nClearDispIndex) == 0)
@@ -2914,7 +2905,6 @@ static int delete_vpu_displayed_index(OMX_COMPONENTTYPE * openmaxStandComp, OMX_
 	for(i = 0; i < 32; i++ ) //Max 32 elements
 	{
 		nClearDispIndex = (int)dxb_dequeue(omx_private->pVideoDecodInstance[uiDecoderID].pVPUDisplayedIndexQueue);
-
 		if( nClearDispIndex ==  0 )
 			break;
 
@@ -2979,12 +2969,6 @@ void dxb_omx_videodec_component_BufferMgmtCallback (OMX_COMPONENTTYPE * openmaxS
 	int      nDeocodedBufferOut = 0;
 
 	omx_base_video_PortType *outPort;
-
-#if 0	// no video render
-	pInputBuffer->nFilledLen = 0;
-	pOutputBuffer->nFilledLen = 0;
-	return;
-#endif
 
 //ALOGE("FILE_BUFFER_MODE");
 
@@ -3345,13 +3329,11 @@ void dxb_omx_videodec_component_BufferMgmtCallback (OMX_COMPONENTTYPE * openmaxS
                     }
 
                     outPort->sPortParam.format.video.xFramerate = framerate_hz;
-#ifdef ENABLE_VSYNC
 #ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
                     if (isVsyncEnabled(omx_private, uiDecoderID) == 1)
                     {
                         tcc_vsync_command(omx_private,TCC_LCDC_VIDEO_SET_FRAMERATE, framerate_hz) ;  // TCC_LCDC_HDMI_GET_DISPLAYED
                     }
-#endif
 #endif
                 }
                 else
@@ -3384,14 +3366,14 @@ void dxb_omx_videodec_component_BufferMgmtCallback (OMX_COMPONENTTYPE * openmaxS
 		dxb_omx_videodec_component_videoframedelay_set(openmaxStandComp, uiDecoderID);
 
 	}
-#ifdef ENABLE_VSYNC
+
 #ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 	if(pPrivateData->bRollback == OMX_TRUE && omx_private->iDisplayID == uiDecoderID)
 	{
 		goto ERR_PROCESS;
 	}
 #endif
-#endif
+
 	memcpy (omx_private->pVideoDecodInstance[uiDecoderID].gsVDecInput.m_pInp[VA], omx_private->inputCurrBuffer, omx_private->inputCurrLength);
 	omx_private->pVideoDecodInstance[uiDecoderID].gsVDecInput.m_iInpLen = omx_private->inputCurrLength;
 
@@ -4069,7 +4051,6 @@ void dxb_omx_videodec_component_BufferMgmtCallback (OMX_COMPONENTTYPE * openmaxS
 	}
 #endif//SUPPORT_PVR
 
-
 	//ALOGE("PTS = %lld", pOutputBuffer->nTimeStamp);
 	pthread_mutex_unlock(&omx_private->pVideoDecodInstance[uiDecoderID].stVideoStart.mutex);
 	return;
@@ -4283,7 +4264,6 @@ OMX_ERRORTYPE dxb_omx_videodec_component_SetParameter (OMX_IN OMX_HANDLETYPE hCo
 			OMX_U32	ulDemuxId;
 			piArg = (OMX_S32 *) ComponentParameterStructure;
 			ulDemuxId = (OMX_U32) piArg[0];
-#ifdef ENABLE_VSYNC
 #ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 			if (isVsyncEnabled(omx_private, ulDemuxId) == 1)
 			{
@@ -4293,7 +4273,6 @@ OMX_ERRORTYPE dxb_omx_videodec_component_SetParameter (OMX_IN OMX_HANDLETYPE hCo
 					tcc_vsync_command(omx_private, (int)TCC_LCDC_VIDEO_SKIP_FRAME_END, 0);
 				}
 			}
-#endif
 #endif
 			omx_private->pVideoDecodInstance[ulDemuxId].bVideoPaused = (OMX_BOOL) piArg[1];
 		}

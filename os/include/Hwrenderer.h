@@ -24,7 +24,48 @@ typedef unsigned int uint32_t;
 #endif
 
 //#define USE_OUTPUT_COMPONENT_COMPOSITE 
+#ifndef ADDRESS_ALIGNED
+#define ADDRESS_ALIGNED
+#define ALIGN_BIT (0x8-1)
+#define BIT_0 3
+#define GET_ADDR_YUV42X_spY(Base_addr)          (((((unsigned int)Base_addr) + ALIGN_BIT)>> BIT_0)<<BIT_0)
+#define GET_ADDR_YUV42X_spU(Yaddr, x, y)                (((((unsigned int)Yaddr+(x*y)) + ALIGN_BIT)>> BIT_0)<<BIT_0)
+#define GET_ADDR_YUV422_spV(Uaddr, x, y)                (((((unsigned int)Uaddr+(x*y/2)) + ALIGN_BIT) >> BIT_0)<<BIT_0)
+#define GET_ADDR_YUV420_spV(Uaddr, x, y)                (((((unsigned int)Uaddr+(x*y/4)) + ALIGN_BIT) >> BIT_0)<<BIT_0)
+#endif
 
+typedef enum{
+    TCC_LCDC_IMG_FMT_1BPP,
+    TCC_LCDC_IMG_FMT_2BPP,
+    TCC_LCDC_IMG_FMT_4BPP,
+    TCC_LCDC_IMG_FMT_8BPP,
+    TCC_LCDC_IMG_FMT_RGB332 = 8,
+    TCC_LCDC_IMG_FMT_RGB444 = 9,
+    TCC_LCDC_IMG_FMT_RGB565 = 10,
+    TCC_LCDC_IMG_FMT_RGB555 = 11,
+    TCC_LCDC_IMG_FMT_RGB888 = 12,
+    TCC_LCDC_IMG_FMT_RGB666 = 13,
+    TCC_LCDC_IMG_FMT_RGB888_3   = 14,       /* RGB888 - 3bytes aligned - B1[31:24],R0[23:16],G0[15:8],B0[7:0] newly supported : 3 bytes format*/
+    TCC_LCDC_IMG_FMT_ARGB6666_3 = 15,       /* ARGB6666 - 3bytes aligned - A[23:18],R[17:12],G[11:6],B[5:0]newly supported : 3 bytes format */
+    TCC_LCDC_IMG_FMT_COMP = 16,             // 4bytes
+    TCC_LCDC_IMG_FMT_DECOMP = (TCC_LCDC_IMG_FMT_COMP),
+    TCC_LCDC_IMG_FMT_444SEP = 21,
+    TCC_LCDC_IMG_FMT_UYVY = 22,     /* 2bytes   : YCbCr 4:2:2 Sequential format LSB [Y/U/Y/V] MSB : newly supported : 2 bytes format*/
+    TCC_LCDC_IMG_FMT_VYUY = 23,     /* 2bytes   : YCbCr 4:2:2 Sequential format LSB [Y/V/Y/U] MSB : newly supported : 2 bytes format*/
+
+    TCC_LCDC_IMG_FMT_YUV420SP = 24,
+    TCC_LCDC_IMG_FMT_YUV422SP = 25,
+    TCC_LCDC_IMG_FMT_YUYV = 26,
+    TCC_LCDC_IMG_FMT_YVYU = 27,
+
+    TCC_LCDC_IMG_FMT_YUV420ITL0 = 28,
+    TCC_LCDC_IMG_FMT_YUV420ITL1 = 29,
+    TCC_LCDC_IMG_FMT_YUV422ITL0 = 30,
+    TCC_LCDC_IMG_FMT_YUV422ITL1 = 31,
+    TCC_LCDC_IMG_FMT_MAX
+}TCC_LCDC_IMG_FMT_TYPE;
+
+//#include <tcc_types.h>
 #include <tcc_grp_ioctrl.h>
 #include <tcc_scaler_ioctrl.h>
 #ifdef USE_OUTPUT_COMPONENT_COMPOSITE 
@@ -35,9 +76,11 @@ typedef unsigned int uint32_t;
 #include <tccfb_ioctrl.h>
 #include <tcc_viqe_ioctl.h>
 #include <tcc_mem_ioctl.h>
-#ifdef ENABLE_VSYNC
+
+#ifdef TCC_VIDEO_DISPLAY_BY_VSYNC_INT
 #include <tcc_vsync_ioctl.h>
 #endif
+
 #include <libpmap/pmap.h>
 #include <stdlib.h>
 #include <linux/fb.h>

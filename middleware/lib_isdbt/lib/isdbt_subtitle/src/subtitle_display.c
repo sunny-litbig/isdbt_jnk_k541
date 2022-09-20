@@ -63,7 +63,7 @@ For backtrace
 /**********************************************************************************
 CCFB DEFINITIONS
 ***********************************************************************************/
-#ifdef ENABLE_VSYNC
+#if defined(SUBTITLE_DEMUX_DUMP_INPUT_TO_FILE)
 #include <tcc_ccfb_ioctl.h>
 #endif
 #ifdef HAVE_LINUX_PLATFORM
@@ -75,7 +75,7 @@ CCFB DEFINITIONS
 static int g_ccfb_fd = -1;
 static int g_wmixer_fd = -1;
 static SUB_OP_TYPE	g_sub_op_ftn;
-int subtitle_display_get_state_ccfb(void);
+//int subtitle_display_get_state_ccfb(void);
 
 /****************************************************************************
 DEFINITION
@@ -3315,6 +3315,7 @@ int subtitle_display_clear_ccfb(void)
 	return 0;
 }
 
+#if defined(SUBTITLE_CCFB_DISPLAY_ENABLE)
 int subtitle_display_update_ccfb(unsigned int *pAddr)
 {
 	DISP_DBG("[%s]\n", __func__);
@@ -3339,15 +3340,15 @@ int subtitle_display_update_ccfb(unsigned int *pAddr)
 			return -1;
 		}
 		if(update_sync_drawing == 1){
-#ifdef ENABLE_VSYNC		
 			ioctl(ccfb_fd, CCFB_DISP_UPDATE, (void*)&pAddr);
 			LOGE("[%s] physical address[%p]\n", __func__, pAddr);
-#endif
 		}
 	}
 	return 0;
 }
+#endif
 
+#if 0
 int subtitle_display_get_state_ccfb(void)
 {
 	int ccfb_fd;
@@ -3358,11 +3359,11 @@ int subtitle_display_get_state_ccfb(void)
 		LOGE("ccfb_fd is not initialized yet!\n");
 		return -1;
 	}
-#ifdef ENABLE_VSYNC
+
 	ioctl(ccfb_fd, CCFB_GET_CONFIG, &state);
-#endif
 	return (int) state;
 }
+#endif
 
 int subtitle_display_enable_ccfb(int enable)
 {
