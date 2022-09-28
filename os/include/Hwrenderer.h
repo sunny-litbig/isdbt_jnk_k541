@@ -65,7 +65,6 @@ typedef enum{
     TCC_LCDC_IMG_FMT_MAX
 }TCC_LCDC_IMG_FMT_TYPE;
 
-//#include <tcc_types.h>
 #include <tcc_grp_ioctrl.h>
 #include <tcc_scaler_ioctrl.h>
 #ifdef USE_OUTPUT_COMPONENT_COMPOSITE 
