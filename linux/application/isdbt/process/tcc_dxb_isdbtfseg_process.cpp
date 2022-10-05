@@ -105,7 +105,7 @@ void subtitle_app_dump_file_open()
 	char szName[1024] = {0,};
 
 	if(gp_file_handle == NULL){
-		sprintf(szName, "/run/media/ndda9/subtitle_app_dump_%03d.raw", index++);
+		sprintf(szName, "/run/media/sda1/subtitle_app_dump_%03d.raw", index++);
 		gp_file_handle = fopen(szName, "wb");
 		if(gp_file_handle == NULL){
 			printf("===>> subtitle dump file open error %d\n", gp_file_handle);
@@ -137,8 +137,14 @@ void subtitle_app_memory_mapping_init(unsigned int addr, int size)
 		return;
 
 	if(fd == -1){
+#if 0
 		fd = open("/dev/ccfb", O_RDWR);
 		pmap_get_info("overlay1", &pmem_info);
+#else
+		fd = open("/dev/wmixer1", O_RDWR);
+		pmap_get_info("subtitle", &pmem_info);
+#endif
+
 		printf("<===== size[%d], buf_phy[%p]=====>\n", size, addr);
 		subtitle_buf_addr = (unsigned int)mmap(0, pmem_info.size, (PROT_READ|PROT_WRITE), MAP_SHARED, fd, pmem_info.base);
 		if(subtitle_buf_addr == (unsigned int)MAP_FAILED){
